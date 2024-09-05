@@ -1,17 +1,14 @@
 # Instagram Database Clone
-___
 
-**This different logical queries will be added over three days time**
+**Here different logical queries will be added over three days time**
 
 This repository contains the schema for a simplified clone of Instagram's database that I tried to create based on everything I've learned so far. The schema is designed to store users, photos, comments, likes, follows, and tags, with appropriate normalization and relationships between entities.
 
 ## Entity-Relationship (ER) Diagram
-___
 
 ![ER Diagram](ER_Diagram.svg)
 
 ## Database Structure
-___
 
 ### 1. Users Table
 This table stores the details of users in the application.
@@ -138,7 +135,6 @@ CREATE TABLE photo_tags (
 ```
 
 ## Database Normalization
-___
 
 Normalization is a database design technique that organizes tables to minimize redundancy and dependency. In this schema:
 
@@ -151,3 +147,111 @@ Consider a photo that has multiple tags:
 
 - Without normalization, we might have a table(tags) where the same photo is stored multiple times, each with a different tagName. This would lead to redundancy.
 - With normalization, we separate the tags into a different table and use a junction table (`photo_tags`) to link photos with their tags. This eliminates redundancy and ensures data consistency.
+
+## Some Logical Queries
+1. **Query 1:** What day of the week do most users register on?
+   ```sql
+   select
+    count(*) as total,
+    dayname(createdAt) as day
+    from
+        users
+    group by
+        day
+    order by
+        total desc
+    limit
+        1;
+    ```
+2. **Query 2:** Select the top 5 users that have been loyal for more than eight years and maybe reward them.
+   ```sql
+   select
+    *
+    from
+        users
+    where
+        datediff(now(), createdAt) / 356 > 8
+    order by
+        createdAt desc
+    limit
+        5;
+    ```
+3. **Query 3:** Find the users who have never posted a photo and send them email to post some photos.
+   ```sql
+    select
+        username
+    from
+        users
+        left join photos on users.id = photos.userId
+    where
+        photos.id is null;
+    ```
+4. **Query 4:** Pick a most liked photo and send the user who posted that photo a reward.
+   ```sql
+    select
+        username,
+        photos.id,
+        photos.imageUrl,
+        count(*) as total
+    from
+        photos
+        inner join likes on likes.photoId = photos.id
+        inner join users on photos.userId = users.id
+    group by
+        photos.id
+    order by
+        total desc
+    limit
+        1;
+    ```
+5. **Query 5:** How many times does an average user posts?
+     ```sql
+    select
+        ceil(
+            (
+                select
+                    count(*)
+                from
+                    photos
+            ) / (
+                select
+                    count(*)
+                from
+                    users
+            )
+        ) as average;
+    ```
+6. **Query 6:** What are the top 5 most commonly userd hashtags?
+   ```sql
+   select
+        count(*) as total,
+        tags.tagName
+    from
+        photo_tags
+        join tags on photo_tags.tagId = tags.id
+    group by
+        tags.id
+    order by
+        total desc
+    limit
+        5;
+    ```
+7. **Query 7:** Find users who have likes every single photo on the app (*detect bots*)
+   ```sql
+    select
+        username,
+        likes.userId,
+        count(*) as totalLikes
+    from
+        users
+        inner join likes on users.id = likes.userId
+    group by
+        likes.userId
+    having
+        totalLikes = (
+            select
+                count(*)
+            from
+                photos
+        );
+    ```
