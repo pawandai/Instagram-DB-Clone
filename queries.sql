@@ -96,3 +96,52 @@ having
         from
             photos
     );
+
+-- Show all the users that have liked a specific photo with id = 1
+SELECT
+    user.username
+FROM
+    likes
+    JOIN users ON likes.userId = users.id
+WHERE
+    likes.photoId = 1;
+
+-- Retrieve all followers of a specific user with id = 1
+SELECT
+    u.username
+FROM
+    follows f
+    JOIN users u ON f.followerId = u.id
+WHERE
+    f.followeeId = 1;
+
+-- Find users who have never uploaded a photo.
+SELECT
+    username
+FROM
+    users
+WHERE
+    id NOT IN (
+        SELECT
+            userId
+        FROM
+            photos
+    );
+
+-- Get a list of users who follow a specific user and have commented on one of their photos.
+SELECT
+    DISTINCT u.username
+FROM
+    follows f
+    JOIN users u ON f.followerId = u.id
+    JOIN comments c ON c.userId = u.id
+WHERE
+    f.followeeId = 1
+    AND c.photoId IN (
+        SELECT
+            id
+        FROM
+            photos
+        WHERE
+            userId = 1
+    );

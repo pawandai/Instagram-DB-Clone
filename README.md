@@ -149,6 +149,7 @@ Consider a photo that has multiple tags:
 - With normalization, we separate the tags into a different table and use a junction table (`photo_tags`) to link photos with their tags. This eliminates redundancy and ensures data consistency.
 
 ## Some Logical Queries
+### Basic Queries
 1. **Query 1:** What day of the week do most users register on?
    ```sql
    select
@@ -176,6 +177,7 @@ Consider a photo that has multiple tags:
     limit
         5;
     ```
+### Intermediate Queries
 3. **Query 3:** Find the users who have never posted a photo and send them email to post some photos.
    ```sql
     select
@@ -255,3 +257,57 @@ Consider a photo that has multiple tags:
                 photos
         );
     ```
+8. **Query 8:** Retrieve all followers of a specific user
+   ```sql
+    SELECT
+        u.username
+    FROM
+        follows f
+        JOIN users u ON f.followerId = u.id
+    WHERE
+        f.followeeId = 1;
+    ```
+9.  **Query 9:** Show all the users that have liked a specific photo with id = 1
+    ```sql
+    SELECT
+        users.username
+    FROM
+        likes
+        JOIN users ON likes.userId = users.id
+    WHERE
+        likes.photoId = 1;
+    ```
+10. **Query 10:** Find users who have never uploaded a photo.
+    ```sql
+    SELECT
+        username
+    FROM
+        users
+    WHERE
+        id NOT IN (
+            SELECT
+                userId
+            FROM
+                photos
+        );
+    ```
+11. **Query 11:** Get a list of users who follow a specific user and have commented on one of their photos.
+    ```sql
+    SELECT
+    DISTINCT u.username
+    FROM
+        follows f
+        JOIN users u ON f.followerId = u.id
+        JOIN comments c ON c.userId = u.id
+    WHERE
+        f.followeeId = 1
+        AND c.photoId IN (
+            SELECT
+                id
+            FROM
+                photos
+            WHERE
+                userId = 1
+        );
+    ```
+12. **Query 12:**
