@@ -1,6 +1,5 @@
-# Instagram Database Clone
-
-**Here different logical queries will be added over three days time**
+# Basic Instagram Database Clone
+*(source: google)*
 
 This repository contains the schema for a simplified clone of Instagram's database that I tried to create based on everything I've learned so far. The schema is designed to store users, photos, comments, likes, follows, and tags, with appropriate normalization and relationships between entities.
 
@@ -149,6 +148,7 @@ Consider a photo that has multiple tags:
 - With normalization, we separate the tags into a different table and use a junction table (`photo_tags`) to link photos with their tags. This eliminates redundancy and ensures data consistency.
 
 ## Some Logical Queries
+I spent most of my time learning sql queries during the time of my Database Management System Exam. There were so many options on how to write queries, I've sorted few them from basic to advanced :
 ### Basic Queries
 1. **Query 1:** What day of the week do most users register on?
    ```sql
@@ -310,4 +310,51 @@ Consider a photo that has multiple tags:
                 userId = 1
         );
     ```
-12. **Query 12:**
+
+### Advanced Queries
+12. **Query 12:** Find the average number of comments per photo.
+    ```sql
+    SELECT
+        AVG(comment_count)
+    FROM
+        (
+            SELECT
+                photoId,
+                COUNT(*) AS comment_count
+            FROM
+                comments
+            GROUP BY
+                photoId
+        ) AS avg_comments;
+
+    ```
+
+13. **Query 13:** Find top 3 most liked photos with the total number of comments on each photo.
+    ```sql
+    SELECT
+        p.id,
+        COUNT(l.userId) AS like_count,
+        COUNT(c.id) AS comment_count
+    FROM
+        photos p
+        LEFT JOIN likes l ON p.id = l.photoId
+        LEFT JOIN comments c ON p.id = c.photoId
+    GROUP BY
+        p.id
+    ORDER BY
+        like_count DESC
+    LIMIT
+        3;
+    ```
+
+14. **Query 14:** Find the number of mutual followers between two users (userA and userB).
+    ```sql
+    SELECT
+        COUNT(*)
+    FROM
+        follows f1
+        JOIN follows f2 ON f1.followerId = f2.followerId
+    WHERE
+        f1.followeeId = userA
+        AND f2.followeeId = userB;
+    ```

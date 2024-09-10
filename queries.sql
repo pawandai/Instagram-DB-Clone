@@ -145,3 +145,43 @@ WHERE
         WHERE
             userId = 1
     );
+
+-- Find the average number of comments per photo.
+SELECT
+    AVG(comment_count)
+FROM
+    (
+        SELECT
+            photoId,
+            COUNT(*) AS comment_count
+        FROM
+            comments
+        GROUP BY
+            photoId
+    ) AS comment_counts;
+
+-- Find top 3 most liked photos with the total number of comments on each photo.
+SELECT
+    p.id,
+    COUNT(l.userId) AS like_count,
+    COUNT(c.id) AS comment_count
+FROM
+    photos p
+    LEFT JOIN likes l ON p.id = l.photoId
+    LEFT JOIN comments c ON p.id = c.photoId
+GROUP BY
+    p.id
+ORDER BY
+    like_count DESC
+LIMIT
+    3;
+
+-- Get the number of mutual followers between two users (userA and userB).
+SELECT
+    COUNT(*)
+FROM
+    follows f1
+    JOIN follows f2 ON f1.followerId = f2.followerId
+WHERE
+    f1.followeeId = userA
+    AND f2.followeeId = userB;
